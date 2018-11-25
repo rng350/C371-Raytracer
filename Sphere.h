@@ -12,5 +12,6 @@ public:
 	glm::vec3 center;
 	float radius;
 	void print();
+	glm::vec3 calcNormal(glm::vec3 point);
 };
 #endif

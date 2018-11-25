@@ -56,9 +56,14 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 			shadeInfo.spe_col = this->spe_col;
 			shadeInfo.shininess = this->shininess;
 			shadeInfo.hit_an_obj = true;
+			shadeInfo.surface_norm = calcNormal(ray_orig + ray_dir*(float)t);
 		}
 	}
 	return true;
+}
+glm::vec3 Sphere::calcNormal(glm::vec3 point)
+{
+	return glm::vec3((point.x - center.x), (point.y - center.y), point.z-center.z);
 }
 
 void Sphere::print()

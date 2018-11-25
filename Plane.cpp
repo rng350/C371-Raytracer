@@ -37,6 +37,7 @@ bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 			shadeInfo.spe_col = this->spe_col;
 			shadeInfo.shininess = this->shininess;
 			shadeInfo.hit_an_obj = true;
+			shadeInfo.surface_norm = this->normal;
 		}
 		return true;
 	}

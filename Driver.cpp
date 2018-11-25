@@ -10,22 +10,26 @@
 #define INV_PI 0.31830988618379067153776752674503
 #define TO_RADIANS 0.01745329251994329576923690768489
 
-glm::vec3 color(const Ray& r)
-{
-	glm::vec3 unit_direction = glm::normalize(r.getDirection());
-	float t = 0.5*(unit_direction.y + 1.0f);
-	return (1.0f - t) * glm::vec3(1.0f, 1.0f, 1.0f) + t * glm::vec3(0.5f, 0.7f, 1.0f);
-}
+
+Camera camera;
+Plane plane;
+Mesh mesh;
+std::vector<Sphere> spheres;
+std::vector<Triangle> triangles;
+std::vector<Light> lights;
+std::vector<GeometricObject*> objects;
+
+bool hitLight(const Ray& sec_ray, const Light& light);
 
 int main() {
-	Camera camera;
-	Plane plane;
-	Mesh mesh;
-	std::vector<Sphere> spheres;
-	std::vector<Triangle> triangles;
-	std::vector<Light> lights;
 
-	if (load_scene("scene/scene1.txt", camera, mesh, plane, spheres, lights, triangles))
+	std::string input_file_path, output_file_path;
+	std::cout << "Please enter the scene filename: ";
+	std::cin >> input_file_path;
+	std::cout << "Please enter the output filename: ";
+	std::cin >> output_file_path;
+
+	if (load_scene(("scene/" + input_file_path).c_str(), camera, mesh, plane, spheres, lights, triangles))
 	{
 		std::cout << "SCENE LOADED" << std::endl;
 		camera.print();
@@ -76,7 +80,6 @@ int main() {
 	Ray ray;
 	ShadeInfo shadeInfo;
 
-	std::vector<GeometricObject*> objects;
 	objects.push_back(&plane);
 	for (int i = 0; i < spheres.size(); i++)
 	{
@@ -109,9 +112,30 @@ int main() {
 			}
 			if (shadeInfo.hit_an_obj)
 			{
-				image(x, height - 1 - y, RED) = shadeInfo.amb_col.x * 255.0f;
-				image(x, height - 1 - y, GREEN) = shadeInfo.amb_col.y * 255.0f;
-				image(x, height - 1 - y, BLUE) = shadeInfo.amb_col.z * 255.0f;
+				glm::vec3 pt_of_contact = camera.pos + (float)t*ray_direction;
+
+				glm::vec3 secondary_ray_dir = glm::normalize(lights[i].pos - pt_of_contact);
+				Ray sec_ray = Ray(pt_of_contact, secondary_ray_dir);
+
+				glm::vec3 computed_color = shadeInfo.amb_col;
+
+				if (hitLight(sec_ray, lights[i]))
+				{
+					float l_dot_n = glm::dot(shadeInfo.surface_norm, secondary_ray_dir);
+					if (l_dot_n < 0.0f)
+						l_dot_n = 0.0f;
+					glm::vec3 r = 2.0f*(l_dot_n)*shadeInfo.surface_norm - secondary_ray_dir;
+					float r_dot_v = glm::dot(r, ray_direction);
+					if (r_dot_v < 0.0f)
+						r_dot_v = 0.0f;
+					computed_color += lights[i].col * (shadeInfo.diff_col*(l_dot_n)) + shadeInfo.spe_col * (pow(r_dot_v, shadeInfo.shininess));
+				}
+
+				computed_color = glm::clamp(computed_color, 0.0f, 1.0f);
+
+				image(x, height - 1 - y, RED) = computed_color.x * 255.0f;
+				image(x, height - 1 - y, GREEN) = computed_color.y * 255.0f;
+				image(x, height - 1 - y, BLUE) = computed_color.z * 255.0f;
 			}
 			
 			if ((x == 0) && (y == 1))
@@ -135,9 +159,29 @@ int main() {
 	//...
 	//...
 	// save out image in BMP format
-	image.save("_output/out.bmp");
+	image.save(("_output/" + output_file_path).c_str());
 	// display the rendered image on screen
 	cimg_library::CImgDisplay main_disp(image, "Render");
 	while (!main_disp.is_closed()) { main_disp.wait(); }
 	system("pause");
+}
+
+bool hitLight(const Ray& sec_ray, const Light& light)
+{
+	double t = INFINITY;
+
+	ShadeInfo dummy = ShadeInfo();
+
+	// we only care if it hits ANY object along the way
+	for (int i = 0; i < objects.size(); i++)
+	{
+		if (objects[i]->hit(sec_ray, t, dummy))
+			return false;
+	}
+	for (int i = 0; i < mesh.triangles.size(); i++)
+	{
+		if (mesh.triangles[i]->hit(sec_ray, t, dummy))
+			return false;
+	}
+	return true;
 }
