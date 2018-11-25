@@ -39,7 +39,19 @@ bool Triangle::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 
 	if (abs(1 - (alpha + beta + epsilon)) > 0.000001)
 		return false;
-	else return true;
+	else
+	{
+		if (temp_t < t)
+		{
+			t = temp_t;
+			shadeInfo.amb_col = this->amb_col;
+			shadeInfo.diff_col = this->diff_col;
+			shadeInfo.spe_col = this->spe_col;
+			shadeInfo.shininess = this->shininess;
+			shadeInfo.hit_an_obj = true;
+		}
+		return true;
+	}
 }
 
 void Triangle::print()

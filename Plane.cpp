@@ -29,8 +29,15 @@ bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	else
 	{
 		// t was initialized at -1.0
-		if ((t < 0.0) || (temp_t < t))
+		if (temp_t < t)
+		{
 			t = temp_t;
+			shadeInfo.amb_col = this->amb_col;
+			shadeInfo.diff_col = this->diff_col;
+			shadeInfo.spe_col = this->spe_col;
+			shadeInfo.shininess = this->shininess;
+			shadeInfo.hit_an_obj = true;
+		}
 		return true;
 	}
 }

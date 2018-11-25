@@ -49,7 +49,14 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	else
 	{
 		if (temp_t < t)
+		{
 			t = temp_t;
+			shadeInfo.amb_col = this->amb_col;
+			shadeInfo.diff_col = this->diff_col;
+			shadeInfo.spe_col = this->spe_col;
+			shadeInfo.shininess = this->shininess;
+			shadeInfo.hit_an_obj = true;
+		}
 	}
 	return true;
 }

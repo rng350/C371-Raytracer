@@ -25,7 +25,7 @@ int main() {
 	std::vector<Triangle> triangles;
 	std::vector<Light> lights;
 
-	if (load_scene("scene/scenefish.txt", camera, mesh, plane, spheres, lights, triangles))
+	if (load_scene("scene/scene1.txt", camera, mesh, plane, spheres, lights, triangles))
 	{
 		std::cout << "SCENE LOADED" << std::endl;
 		camera.print();
@@ -70,62 +70,6 @@ int main() {
 	glm::vec3 vertical = glm::vec3(0.0f, 2.0f, 0.0f);
 	glm::vec3 origin = glm::vec3(0.0f, 0.0f, 0.0f);
 
-
-	/*
-	for (float y = 599.0f; y > -1.0f; y--) {
-		for (float x = 0; x < WIDTH; x++) {
-			float u = (x / WIDTH);
-			float v = (y / HEIGHT);
-
-			Ray r = Ray(origin, lower_left_corner + u * horizontal + v * vertical);
-			glm::vec3 col = color(r);
-
-			image(x, (599.0f - y), RED) = col.x * 255.0f;
-			image(x, (599.0f - y), GREEN) = col.y * 255.0f;
-			image(x, (599.0f - y), BLUE) = col.z * 255.0f;
-		}
-	}
-	*/
-
-	/*
-	for (float y = 0; y < height; y++) {
-		for (float x = 0; x < width; x++) {
-
-			// red at lowest y & x corner
-			if ((y < height / 2.0) && (x < width / 3.0))
-			{
-				image(x, height - 1 - y, RED) = 1.0 * 255.0f;
-				image(x, height - 1 - y, GREEN) = 0.0 * 255.0f;
-				image(x, height - 1 - y, BLUE) = 0.0 * 255.0f;
-			}
-
-			// green at lowest y, highest x corner
-			if ((y < height / 3.0) && (x > 2.0 * width / 3.0))
-			{
-				image(x, height - 1 - y, RED) = 0.0 * 255.0f;
-				image(x, height - 1 - y, GREEN) = 1.0 * 255.0f;
-				image(x, height - 1 - y, BLUE) = 0.0 * 255.0f;
-			}
-
-			// grey at  highest y, lowest x corner
-			if ((y > 2.0 * height / 3.0) && (x < width / 3.0))
-			{
-				image(x, height - 1 - y, RED) = 0.5 * 255.0f;
-				image(x, height - 1 - y, GREEN) = 0.5 * 255.0f;
-				image(x, height - 1 - y, BLUE) = 0.5 * 255.0f;
-			}
-
-			// blue at highest y, highest x corner
-			if ((y > 2.0 * height / 3.0) && (x > 2.0 * width / 3.0))
-			{
-				image(x, height - 1 - y, RED) = 0.0 * 255.0f;
-				image(x, height - 1 - y, GREEN) = 0.0 * 255.0f;
-				image(x, height - 1 - y, BLUE) = 1.0 * 255.0f;
-			}
-		}
-	}
-	*/
-
 	float dx, dy, dz = -camera.focal_length;
 	glm::vec3 ray_direction;
 	double t;
@@ -138,6 +82,10 @@ int main() {
 	{
 		objects.push_back(&spheres[i]);
 	}
+	for (int i = 0; i < triangles.size(); i++)
+	{
+		objects.push_back(&triangles[i]);
+	}
 
 	int i = 0;
 
@@ -146,46 +94,25 @@ int main() {
 			dx = x + 0.5 - (width * 0.5);
 			dy = y + 0.5 - (height * 0.5);
 			t = INFINITY;
+			shadeInfo = ShadeInfo();
 
 			ray_direction = glm::normalize(glm::vec3(dx, dy, dz));
 			ray = Ray(camera.pos, ray_direction);
 
-			/*
-			*/
-			if (plane.hit(ray,t,shadeInfo))
+			for (int i = 0; i < objects.size(); i++)
 			{
-				//std::cout << ++i << "xy:<" << x << "," << (height - 1 - y) << ">";
-				//std::cout << ++i << "ray_dir:<" << ray.getDirection().x << "," << ray.getDirection().y << "," << ray.getDirection().z << ">" << std::endl;
-				image(x, height - 1 - y, RED) = 0.0 * 255.0f;
-				image(x, height - 1 - y, GREEN) = 1.0 * 255.0f;
-				image(x, height - 1 - y, BLUE) = 0.0 * 255.0f;
-			}
-
-			for (int i = 0; i < spheres.size(); i++)
-			{
-				if (spheres[i].hit(ray, t, shadeInfo))
-				{
-					image(x, height - 1 - y, RED) = 1.0 * 255.0f;
-					image(x, height - 1 - y, GREEN) = 0.0 * 255.0f;
-					image(x, height - 1 - y, BLUE) = 0.0 * 255.0f;
-				}
+				objects[i]->hit(ray, t, shadeInfo);
 			}
 			for (int i = 0; i < mesh.triangles.size(); i++)
 			{
-				if (mesh.triangles[i]->hit(ray, t, shadeInfo))
-				{
-					std::cout << "h!";
-					image(x, height - 1 - y, RED) = 0.0 * 255.0f;
-					image(x, height - 1 - y, GREEN) = 0.0 * 255.0f;
-					image(x, height - 1 - y, BLUE) = 1.0 * 255.0f;
-					break;
-				}
+				mesh.triangles[i]->hit(ray, t, shadeInfo);
 			}
-			/*
-			*/
-
-			//if ((x == 30) && x == y)
-			//	std::cout << "Ray @ WANTED: pos:<" << ray.origin.x << "," << ray.origin.y << "," << ray.origin.z << ">, dir:<" << ray.dir.x << "," << ray.dir.y << "," << ray.dir.z << ">" << std::endl;
+			if (shadeInfo.hit_an_obj)
+			{
+				image(x, height - 1 - y, RED) = shadeInfo.amb_col.x * 255.0f;
+				image(x, height - 1 - y, GREEN) = shadeInfo.amb_col.y * 255.0f;
+				image(x, height - 1 - y, BLUE) = shadeInfo.amb_col.z * 255.0f;
+			}
 			
 			if ((x == 0) && (y == 1))
 			{
@@ -208,7 +135,7 @@ int main() {
 	//...
 	//...
 	// save out image in BMP format
-	image.save("withPlane.bmp");
+	image.save("_output/out.bmp");
 	// display the rendered image on screen
 	cimg_library::CImgDisplay main_disp(image, "Render");
 	while (!main_disp.is_closed()) { main_disp.wait(); }
