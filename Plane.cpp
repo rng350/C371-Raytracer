@@ -16,15 +16,15 @@ bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	double temp_t;
 	glm::vec3 ray_orig = ray.getOrigin();
 	glm::vec3 ray_dir = ray.getDirection();
-	float d = -(normal.x*pos.x) - (normal.y*pos.y) - (normal.z*pos.z);
-
 	float n_dot_d = glm::dot(normal, ray_dir);
 
-	if (n_dot_d == 0.0)
+	if (abs(n_dot_d) < 0.000001)
 		return false;
-	temp_t = -(glm::dot(normal, ray_orig) + d)
+	temp_t = (glm::dot(normal, (pos-ray_orig)))
 			/ (n_dot_d);
-	if (temp_t <= 0.0)
+
+	// if negative, then the point is behind ray origin
+	if (temp_t < 0.0)
 		return false;
 	else
 	{

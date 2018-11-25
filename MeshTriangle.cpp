@@ -44,7 +44,7 @@ void MeshTriangle::print()
 	//(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3,
 	//glm::vec3 n1, glm::vec3 n2, glm::vec3 n3,
 	//	glm::vec3 amb_col, glm::vec3 diff_col, glm::vec3 spe_col, float shininess);
-	std::cout << "MESH-TRI: v1: <" << v1.x << "," << v1.y << "," << v1.z << ">" <<
+	std::cout << "MESH-TRI:\n- v1: <" << v1.x << "," << v1.y << "," << v1.z << ">" <<
 		"\n- v2: <" << v2.x << "," << v2.y << "," << v2.z << ">" <<
 		"\n- v3: <" << v3.x << "," << v3.y << "," << v3.z << ">" <<
 		"\n- n1: <" << n1.x << "," << n1.y << "," << n1.z << ">" <<

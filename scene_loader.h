@@ -185,15 +185,11 @@ bool load_scene(
 				int res = fscanf_s(file, "%s", lineHeader,128);
 				if (res == EOF)
 					break; // EOF = End Of File. Quit the loop.
-				
-				printf("%s\n",lineHeader);
-
 				if (strcmp(lineHeader, "file:") == 0)
 				{
 					char scene_file[50];
 					fscanf_s(file, "%s\n", &scene_file, 50);
 					filename = scene_file;
-					printf("filename: %s\n", scene_file);
 				}
 				else if (strcmp(lineHeader, "amb:") == 0)
 					fscanf_s(file, "%f %f %f\n", &amb_col.x, &amb_col.y, &amb_col.z);

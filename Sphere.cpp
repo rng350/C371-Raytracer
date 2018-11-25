@@ -21,11 +21,24 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	glm::vec3 ray_orig = ray.getOrigin();
 	glm::vec3 ray_dir = ray.getDirection();
 
+	/*
+	std::cout << "ray orig <" << ray_orig.x << ",";
+	std::cout << ray_orig.y << ",";
+	std::cout << ray_orig.z << ">";
+	std::cout << "ray dir <" << ray_dir.x << ",";
+	std::cout << ray_dir.y << ",";
+	std::cout << ray_dir.z << ">" << std::endl;
+	*/
 	double a = 1.0;
-	double b = 2.0*(ray_dir.x*(ray_orig.x - center.x) + ray_dir.y*(ray_orig.y - center.y) + ray_dir.z*(ray_orig.z - center.z));
+	double b = 2.0*
+			(ray_dir.x*(ray_orig.x - center.x)
+			+ ray_dir.y*(ray_orig.y - center.y)
+			+ ray_dir.z*(ray_orig.z - center.z));
 	double c = (ray_orig.x  - center.x)*(ray_orig.x  - center.x)
 				+ (ray_orig.y  - center.y)*(ray_orig.y  - center.y)
-				+ (ray_orig.z  - center.z)*(ray_orig.z  - center.z);
+				+ (ray_orig.z  - center.z)*(ray_orig.z  - center.z)
+				- (radius*radius);
+
 	if ((b*b - 4*a*c)<0)
 		return false;
 
@@ -35,10 +48,8 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 		return false;
 	else
 	{
-		// t was initialized at -1.0
-		if ((t < 0.0) || (temp_t < t))
+		if (temp_t < t)
 			t = temp_t;
-		return true;
 	}
 	return true;
 }
