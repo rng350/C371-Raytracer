@@ -39,12 +39,12 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 				+ (ray_orig.z  - center.z)*(ray_orig.z  - center.z)
 				- (radius*radius);
 
-	if ((b*b - 4*a*c)<0)
+	if ((b*b - 4*a*c) < 0.0)
 		return false;
 
 	double temp_t = std::min(((-b + sqrt(b*b - 4.0*a*c))/(2*a)), ((-b - sqrt(b*b - 4*a*c))/(2*a)));
 
-	if (temp_t <= 0.0)
+	if (temp_t < 0.00001)
 		return false;
 	else
 	{
@@ -63,7 +63,7 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 }
 glm::vec3 Sphere::calcNormal(glm::vec3 point)
 {
-	return glm::vec3((point.x - center.x), (point.y - center.y), point.z-center.z);
+	return glm::vec3((point.x - center.x)/radius, (point.y - center.y)/radius, (point.z-center.z)/radius);
 }
 
 void Sphere::print()

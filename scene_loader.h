@@ -48,8 +48,6 @@ bool load_scene(
 		if (res == EOF)
 			break; // EOF = End Of File. Quit the loop.
 
-		printf("%s\n", lineHeader);
-
 		if (strcmp(lineHeader, "camera") == 0)
 		{
 			printf("GOT CAMERA!\n");
@@ -212,9 +210,12 @@ bool load_scene(
 			printf("GOT LIGHT!\n");
 			glm::vec3 pos;
 			glm::vec3 col;
+			glm::vec3 amb_col;
+			glm::vec3 diff_col;
+			glm::vec3 spe_col;
 
 			// scan through given attributes in file
-			int num_of_attribs = 2;
+			int num_of_attribs = 4;
 			for (int i = 0; i < num_of_attribs; i++)
 			{
 				char lineHeader[128];
@@ -225,11 +226,18 @@ bool load_scene(
 				
 				if (strcmp(lineHeader, "pos:") == 0)
 					fscanf_s(file, "%f %f %f\n", &pos.x, &pos.y, &pos.z);
-				else if (strcmp(lineHeader, "col:") == 0)
-					fscanf_s(file, "%f %f %f\n", &col.x, &col.y, &col.z);
+				else if (strcmp(lineHeader, "amb:") == 0)
+					fscanf_s(file, "%f %f %f\n", &amb_col.x, &amb_col.y, &amb_col.z);
+				else if (strcmp(lineHeader, "dif:") == 0)
+					fscanf_s(file, "%f %f %f\n", &diff_col.x, &diff_col.y, &diff_col.z);
+				else if (strcmp(lineHeader, "spe:") == 0)
+					fscanf_s(file, "%f %f %f\n", &spe_col.x, &spe_col.y, &spe_col.z);
 				else break;
 			}
-			temp_lights.push_back(Light(pos, col));
+			if (1)
+			{
+				temp_lights.push_back(Light(pos, amb_col, diff_col, spe_col));
+			}
 			count++;
 		}
 		else if (strcmp(lineHeader, "triangle") == 0)

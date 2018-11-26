@@ -18,20 +18,23 @@ bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	glm::vec3 ray_dir = ray.getDirection();
 	float n_dot_d = glm::dot(normal, ray_dir);
 
-	if (abs(n_dot_d) < 0.000001)
+	float d = glm::dot(normal, -pos);
+
+	if ((n_dot_d) == 0.0f)
 		return false;
-	temp_t = (glm::dot(normal, (pos-ray_orig)))
-			/ (n_dot_d);
+	//temp_t = (glm::dot(normal, (pos-ray_orig))) / (n_dot_d);
+	// test
+	temp_t = -(glm::dot(normal, ray_orig) + d) / (n_dot_d);
 
 	// if negative, then the point is behind ray origin
-	if (temp_t < 0.0)
+	if ((temp_t) < 0.00001)
 		return false;
 	else
 	{
-		// t was initialized at -1.0
 		if (temp_t < t)
 		{
 			t = temp_t;
+			// write/rewrite info for newest hit surface
 			shadeInfo.amb_col = this->amb_col;
 			shadeInfo.diff_col = this->diff_col;
 			shadeInfo.spe_col = this->spe_col;

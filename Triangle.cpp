@@ -11,6 +11,7 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 amb_col, 
 	this->v2 = v2;
 	this->v3 = v3;
 	this->flat_normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
+	std::cout << "TRIANGLE FLAT NORMAL: " << flat_normal.x << "," << flat_normal.y << "," << flat_normal.z << std::endl;
 }
 bool Triangle::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 {
@@ -20,13 +21,16 @@ bool Triangle::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	glm::vec3 ray_dir = ray.getDirection();
 	float n_dot_d = glm::dot(flat_normal, ray_dir);
 
-	if (abs(n_dot_d) < 0.000001)
+	float d = glm::dot(flat_normal, -v1);
+
+	if ((n_dot_d) == 0)
 		return false;
-	temp_t = (glm::dot(flat_normal, (v1 - ray_orig)))
-		/ (n_dot_d);
+	// temp_t = (glm::dot(flat_normal, (v1 - ray_orig))) / (n_dot_d);
+	// test
+	temp_t = -(glm::dot(flat_normal, ray_orig) + d) / (n_dot_d);
 
 	// if negative, then the point is behind ray origin
-	if (temp_t < 0.0)
+	if ((temp_t) < 0.00001)
 		return false;
 
 	glm::vec3 vc = ray_orig + ((float)temp_t * ray_dir);
@@ -37,7 +41,7 @@ bool Triangle::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	float beta = glm::length(glm::cross(vc - v2, vc - v1)) / triangle_area_total;
 	float epsilon = glm::length(glm::cross(vc - v3, vc - v1)) / triangle_area_total;
 
-	if (abs(1 - (alpha + beta + epsilon)) > 0.000001)
+	if ((alpha + beta + epsilon) > 1.0f)
 		return false;
 	else
 	{
