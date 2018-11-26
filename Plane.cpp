@@ -14,17 +14,17 @@ Plane::~Plane(){}
 bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 {
 	double temp_t;
-	glm::vec3 ray_orig = ray.getOrigin();
-	glm::vec3 ray_dir = ray.getDirection();
-	float n_dot_d = glm::dot(normal, ray_dir);
+	glm::dvec3 ray_orig = ray.getOrigin();
+	glm::dvec3 ray_dir = ray.getDirection();
+	double n_dot_d = glm::dot((glm::dvec3)normal, ray_dir);
 
-	float d = glm::dot(normal, -pos);
+	double d = glm::dot(normal, -pos);
 
 	if ((n_dot_d) == 0.0f)
 		return false;
 	//temp_t = (glm::dot(normal, (pos-ray_orig))) / (n_dot_d);
 	// test
-	temp_t = -(glm::dot(normal, ray_orig) + d) / (n_dot_d);
+	temp_t = -(glm::dot((glm::dvec3)normal, ray_orig) + d) / (n_dot_d);
 
 	// if negative, then the point is behind ray origin
 	if ((temp_t) < 0.00001)
@@ -40,7 +40,9 @@ bool Plane::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 			shadeInfo.spe_col = this->spe_col;
 			shadeInfo.shininess = this->shininess;
 			shadeInfo.hit_an_obj = true;
+			shadeInfo.hit_obj = Plane_Hit;
 			shadeInfo.surface_norm = this->normal;
+			shadeInfo.hit_coord = ray.pointAtParameter(temp_t);
 		}
 		return true;
 	}

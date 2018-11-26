@@ -12,6 +12,7 @@ public:
 	glm::vec3 center;
 	float radius;
 	void print();
-	glm::vec3 calcNormal(glm::vec3 point);
+	glm::dvec3 calcNormal(glm::dvec3 point);
+	bool equals(const Sphere &s2);
 };
 #endif

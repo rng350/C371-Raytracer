@@ -3,9 +3,11 @@
 #include "ShadeInfo.h"
 #include <cmath>
 #include <iostream>
+#include "enums.h"
 
 #ifndef GEO_OBJ
 #define GEO_OBJ
+
 class GeometricObject
 {
 public:

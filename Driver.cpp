@@ -46,7 +46,6 @@ int main() {
 		{
 			lights[i].print();
 		}
-		std::cout << "Mesh triangles: " << mesh.triangles.size() << std::endl;
 
 		//mesh.print();
 
@@ -69,8 +68,8 @@ int main() {
 	cimg_library::CImg<float> image(width, height, 1, CHANNELS, 0);       // Define a 256x256 color image
 	//...
 
-	float dx, dy, dz = -camera.focal_length;
-	glm::vec3 ray_direction;
+	double dx, dy, dz = -camera.focal_length;
+	glm::dvec3 ray_direction;
 	double t;
 	Ray ray;
 	ShadeInfo shadeInfo;
@@ -85,6 +84,10 @@ int main() {
 		objects.push_back(&triangles[i]);
 	}
 
+	std::cout << "Non-mesh objects: " << objects.size() << std::endl;
+	std::cout << "Mesh triangles (if any): " << mesh.triangles.size() << std::endl;
+	std::cout << "Lights: " << lights.size() << std::endl;
+
 	for (unsigned int y = 0; y < height; y++) {
 		for (unsigned int x = 0; x < width; x++) {
 			dx = x + 0.5 - (width * 0.5);
@@ -92,15 +95,16 @@ int main() {
 			t = INFINITY;
 			shadeInfo = ShadeInfo();
 
-			ray_direction = glm::normalize(glm::vec3(dx, dy, dz));
+			// from viewer to object (if any)
+			ray_direction = glm::normalize(glm::dvec3(dx, dy, dz));
 			ray = Ray(camera.pos, ray_direction);
 
 			// does the ray hit any object?
-			for (int i = 0; i < objects.size(); i++)
+			for (unsigned int i = 0; i < objects.size(); i++)
 			{
 				objects[i]->hit(ray, t, shadeInfo);
 			}
-			for (int i = 0; i < mesh.triangles.size(); i++)
+			for (unsigned int i = 0; i < mesh.triangles.size(); i++)
 			{
 				mesh.triangles[i]->hit(ray, t, shadeInfo);
 			}
@@ -108,32 +112,41 @@ int main() {
 			// if so, is there any occluding object between the hit surface and each light source?
 			if (shadeInfo.hit_an_obj)
 			{
-				//glm::vec3 pt_of_contact = camera.pos + (float)t*ray_direction;
-				glm::vec3 pt_of_contact = ray.pointAtParameter(t);
+				glm::dvec3 pt_of_contact = ray.pointAtParameter(t);
 
 				glm::vec3 computed_color = shadeInfo.amb_col;				
 
-				for (int i = 0; i < lights.size(); i++)
+				for (unsigned int i = 0; i < lights.size(); i++)
 				{
-					glm::vec3 secondary_ray_dir = glm::normalize(lights[i].pos - pt_of_contact);
+					glm::dvec3 secondary_ray_dir = glm::normalize((glm::dvec3)lights[i].pos - pt_of_contact);
 					Ray sec_ray = Ray(pt_of_contact, secondary_ray_dir);
 
+					// ambient contribution from light source
+					if ((shadeInfo.hit_obj == Sphere_Hit))
+						computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
 
 					// if not, add light's contribution to point's color computation
 					if (hitLight(sec_ray, lights[i]))
 					{
-						float l_dot_n = glm::dot(shadeInfo.surface_norm, secondary_ray_dir);
+						double l_dot_n = glm::dot((glm::dvec3)shadeInfo.surface_norm, secondary_ray_dir);
+						
+						if (l_dot_n < 0.0)
+							l_dot_n = 0.0;
 
-						if (l_dot_n < 0.0f)
-							l_dot_n = 0.0f;
+						glm::dvec3 r = 2.0*(l_dot_n)*(glm::dvec3)shadeInfo.surface_norm - secondary_ray_dir;
 
-						glm::vec3 r = 2.0f*(l_dot_n)*shadeInfo.surface_norm - secondary_ray_dir;
+						double r_dot_v = glm::dot(r, -ray_direction);
+						//r_dot_v = glm::clamp(r_dot_v, 0.0, 1.0);
+						if (r_dot_v < 0.0)
+							r_dot_v = 0.0;
 
-						float r_dot_v = glm::dot(r, -ray_direction);
-						r_dot_v = glm::clamp(r_dot_v, 0.0f, 1.0f);
-
-						// compute phong illumination contribution from that light point
-						computed_color += lights[i].amb_col*shadeInfo.amb_col + (((lights[i].diff_col*shadeInfo.diff_col)*(l_dot_n))+((lights[i].spe_col*shadeInfo.spe_col)*(pow(r_dot_v, shadeInfo.shininess))));
+						// ambient contribution from light source
+						if ((shadeInfo.hit_obj == Plane_Hit) || (shadeInfo.hit_obj == Mesh_Hit))
+							computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
+						// diffuse contribution from light source
+						computed_color += (((glm::dvec3)lights[i].diff_col*(glm::dvec3)shadeInfo.diff_col)*(l_dot_n));
+						// specular contribution from light source
+						computed_color += (((glm::dvec3)lights[i].spe_col*(glm::dvec3)shadeInfo.spe_col)*(pow(r_dot_v, shadeInfo.shininess)));
 					}
 				}
 				// clamp it

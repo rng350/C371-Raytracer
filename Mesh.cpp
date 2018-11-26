@@ -2,7 +2,6 @@
 
 Mesh::Mesh()
 {
-
 }
 
 Mesh::Mesh(std::string filename, glm::vec3 amb_col, glm::vec3 diff_col, glm::vec3 spe_col, float shininess)

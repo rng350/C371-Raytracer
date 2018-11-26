@@ -2,5 +2,6 @@
 
 ShadeInfo::ShadeInfo()
 {
-	hit_an_obj = false;
+	this->hit_an_obj = false;
+	this->hit_obj = Nothing_Hit;
 }
