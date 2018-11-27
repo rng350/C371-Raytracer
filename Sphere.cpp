@@ -50,11 +50,11 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 	double temp_t = std::min(((-b + sqrt(b*b - 4.0*a*c))/(2*a)), ((-b - sqrt(b*b - 4*a*c))/(2*a)));
 
 	// if the lower value is negative, use the higher one instead
-	if (temp_t < 0.00001)
+	if (temp_t < 0.000001)
 		temp_t = std::max(((-b + sqrt(b*b - 4.0*a*c)) / (2 * a)), ((-b - sqrt(b*b - 4 * a*c)) / (2 * a)));
 	
 	// and if that one is negative too...
-	if (temp_t < 0.00001)
+	if (temp_t < 0.000001)
 		return false;
 
 	else
@@ -68,8 +68,9 @@ bool Sphere::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 			shadeInfo.shininess = this->shininess;
 			shadeInfo.hit_an_obj = true;
 			shadeInfo.hit_coord = ray.pointAtParameter(temp_t);
-			shadeInfo.surface_norm = calcNormal(ray_orig + ray_dir*t);
+			shadeInfo.surface_norm = calcNormal(ray.pointAtParameter(temp_t));
 			shadeInfo.hit_obj = Sphere_Hit;
+			shadeInfo.hit_sphere_id = this->sphereID;
 		}
 	}
 	return true;
@@ -92,7 +93,6 @@ void Sphere::print()
 
 bool Sphere::equals(const Sphere& s2)
 {
-
 	return
 		(this->center.x == s2.center.x)
 		&& (this->center.y == s2.center.y)

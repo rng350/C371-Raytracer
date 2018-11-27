@@ -1,7 +1,7 @@
-#include "glm/glm.hpp"
-
 #ifndef RAYH
 #define RAYH
+#include "glm/glm.hpp"
+
 class Ray
 {
 	public:

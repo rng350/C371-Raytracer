@@ -1,9 +1,12 @@
+#ifndef GEO_OBJ_INC
+#define GEO_OBJ_INC
 #include "glm/glm.hpp"
 #include "Ray.h"
 #include "ShadeInfo.h"
 #include <cmath>
 #include <iostream>
 #include "enums.h"
+#endif
 
 #ifndef GEO_OBJ
 #define GEO_OBJ

@@ -1,7 +1,7 @@
-#include "GeometricObject.h"
-
 #ifndef __PLANE__
 #define __PLANE__
+#include "GeometricObject.h"
+
 class Plane : public GeometricObject
 {
 public:

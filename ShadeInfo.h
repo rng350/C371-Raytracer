@@ -14,5 +14,7 @@ public:
 	glm::vec3 amb_col, diff_col, spe_col;
 	float shininess;
 	Hit_Object hit_obj;
+	bool sphere_comp_mode;
+	int hit_sphere_id;
 };
 #endif

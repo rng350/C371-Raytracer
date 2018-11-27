@@ -19,7 +19,7 @@ std::vector<Triangle> triangles;
 std::vector<Light> lights;
 std::vector<GeometricObject*> objects;
 
-bool hitLight(const Ray& sec_ray, const Light& light);
+bool hitLight(const Ray& sec_ray, const Light& light, ShadeInfo& shadowRayInfo);
 
 int main() {
 
@@ -29,7 +29,7 @@ int main() {
 	std::cout << "Please enter the output filename: ";
 	std::cin >> output_file_path;
 
-	if (load_scene(("scene/" + input_file_path).c_str(), camera, mesh, plane, spheres, lights, triangles))
+	if (load_scene(("../scene/" + input_file_path).c_str(), camera, mesh, plane, spheres, lights, triangles))
 	{
 		std::cout << "SCENE LOADED" << std::endl;
 		camera.print();
@@ -37,6 +37,7 @@ int main() {
 		for (unsigned int i = 0; i < spheres.size(); i++)
 		{
 			spheres[i].print();
+			spheres[i].sphereID = i;
 		}
 		for (unsigned int i = 0; i < triangles.size(); i++)
 		{
@@ -114,39 +115,66 @@ int main() {
 			{
 				glm::dvec3 pt_of_contact = ray.pointAtParameter(t);
 
-				glm::vec3 computed_color = shadeInfo.amb_col;				
+				glm::vec3 computed_color = shadeInfo.amb_col;	
+				ShadeInfo shadowRayInfo;
+				//shadowRayInfo.sphere_comp_mode = true;
 
 				for (unsigned int i = 0; i < lights.size(); i++)
 				{
+					shadowRayInfo.hit_an_obj = false;
+					shadowRayInfo.hit_obj = Nothing_Hit;
+					shadowRayInfo.sphere_comp_mode = true;
 					glm::dvec3 secondary_ray_dir = glm::normalize((glm::dvec3)lights[i].pos - pt_of_contact);
 					Ray sec_ray = Ray(pt_of_contact, secondary_ray_dir);
 
-					// ambient contribution from light source
-					if ((shadeInfo.hit_obj == Sphere_Hit))
-						computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
-
 					// if not, add light's contribution to point's color computation
-					if (hitLight(sec_ray, lights[i]))
+					if (hitLight(sec_ray, lights[i], shadowRayInfo))
 					{
-						double l_dot_n = glm::dot((glm::dvec3)shadeInfo.surface_norm, secondary_ray_dir);
+						double cosine_angle = glm::dot((glm::dvec3)shadeInfo.surface_norm, secondary_ray_dir);
 						
-						if (l_dot_n < 0.0)
-							l_dot_n = 0.0;
+						if (cosine_angle < 0.0)
+							cosine_angle = 0.0;
 
-						glm::dvec3 r = 2.0*(l_dot_n)*(glm::dvec3)shadeInfo.surface_norm - secondary_ray_dir;
+						glm::dvec3 r = glm::normalize(2.0*(cosine_angle)*(glm::dvec3)shadeInfo.surface_norm - secondary_ray_dir);
 
 						double r_dot_v = glm::dot(r, -ray_direction);
-						//r_dot_v = glm::clamp(r_dot_v, 0.0, 1.0);
 						if (r_dot_v < 0.0)
 							r_dot_v = 0.0;
-
+						
 						// ambient contribution from light source
-						if ((shadeInfo.hit_obj == Plane_Hit) || (shadeInfo.hit_obj == Mesh_Hit))
-							computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
+						computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
 						// diffuse contribution from light source
-						computed_color += (((glm::dvec3)lights[i].diff_col*(glm::dvec3)shadeInfo.diff_col)*(l_dot_n));
+						computed_color += (((glm::dvec3)lights[i].diff_col*(glm::dvec3)shadeInfo.diff_col)*(cosine_angle));
 						// specular contribution from light source
 						computed_color += (((glm::dvec3)lights[i].spe_col*(glm::dvec3)shadeInfo.spe_col)*(pow(r_dot_v, shadeInfo.shininess)));
+					}
+					else
+					{
+						if (shadeInfo.hit_obj == Sphere_Hit)
+						{
+							if ((shadowRayInfo.hit_obj == Sphere_Hit) && (shadowRayInfo.hit_sphere_id == shadeInfo.hit_sphere_id))
+								computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
+						}
+						else if (shadowRayInfo.hit_obj == Plane_Hit)
+						{
+							double cosine_angle = glm::dot((glm::dvec3)shadeInfo.surface_norm, secondary_ray_dir);
+
+							if (cosine_angle < 0.0)
+								cosine_angle = 0.0;
+
+							glm::dvec3 r = glm::normalize(2.0*(cosine_angle)*(glm::dvec3)shadeInfo.surface_norm - secondary_ray_dir);
+
+							double r_dot_v = glm::dot(r, -ray_direction);
+							if (r_dot_v < 0.0)
+								r_dot_v = 0.0;
+
+							// ambient contribution from light source
+							computed_color += ((glm::dvec3)lights[i].amb_col*(glm::dvec3)shadeInfo.amb_col);
+							// diffuse contribution from light source
+							computed_color += (((glm::dvec3)lights[i].diff_col*(glm::dvec3)shadeInfo.diff_col)*(cosine_angle));
+							// specular contribution from light source
+							computed_color += (((glm::dvec3)lights[i].spe_col*(glm::dvec3)shadeInfo.spe_col)*(pow(r_dot_v, shadeInfo.shininess)));
+						}
 					}
 				}
 				// clamp it
@@ -161,29 +189,28 @@ int main() {
 
 
 	// save out image in BMP format
-	image.save(("_output/" + output_file_path).c_str());
+	image.save(("../_output/" + output_file_path).c_str());
 	// display the rendered image on screen
 	cimg_library::CImgDisplay main_disp(image, "Render");
 	while (!main_disp.is_closed()) { main_disp.wait(); }
 	system("pause");
 }
 
-bool hitLight(const Ray& sec_ray, const Light& light)
+bool hitLight(const Ray& sec_ray, const Light& light, ShadeInfo& shadowRayInfo)
 {
 	double t = INFINITY;
-
-	ShadeInfo dummy = ShadeInfo();
+	bool response = true;
 
 	// we only care if it hits ANY object along the way
 	for (int i = 0; i < objects.size(); i++)
 	{
-		if (objects[i]->hit(sec_ray, t, dummy))
-			return false;
+		if (objects[i]->hit(sec_ray, t, shadowRayInfo))
+			response = false;
 	}
 	for (int i = 0; i < mesh.triangles.size(); i++)
 	{
-		if (mesh.triangles[i]->hit(sec_ray, t, dummy))
+		if (mesh.triangles[i]->hit(sec_ray, t, shadowRayInfo))
 			return false;
 	}
-	return true;
+	return response;
 }

@@ -1,6 +1,7 @@
-#include "GeometricObject.h"
 #ifndef __TRIANGLE__
 #define __TRIANGLE__
+#include "GeometricObject.h"
+
 class Triangle : public GeometricObject
 {
 public:

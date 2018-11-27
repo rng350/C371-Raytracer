@@ -1,8 +1,7 @@
-#include "glm/glm.hpp"
-#include <iostream>
-
 #ifndef CAMERAH
 #define CAMERAH
+#include "glm/glm.hpp"
+#include <iostream>
 
 class Camera
 {

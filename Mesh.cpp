@@ -32,7 +32,7 @@ void Mesh::loadTriangles()
 {
 	std::vector<glm::vec3> out_vertices, out_normals;
 	std::vector<glm::vec2> out_uvs;
-	filename = "scene/" + filename;
+	filename = "../scene/" + filename;
 	loadOBJ(this->filename.c_str(), out_vertices, out_normals, out_uvs);
 
 	glm::vec3 v1, v2, v3, n1, n2, n3;

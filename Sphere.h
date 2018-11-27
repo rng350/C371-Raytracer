@@ -1,7 +1,9 @@
-#include "GeometricObject.h"
+
 
 #ifndef __SPHERE__
 #define __SPHERE__
+#include "GeometricObject.h"
+
 class Sphere : public GeometricObject
 {
 public:
@@ -14,5 +16,6 @@ public:
 	void print();
 	glm::dvec3 calcNormal(glm::dvec3 point);
 	bool equals(const Sphere &s2);
+	int sphereID;
 };
 #endif
