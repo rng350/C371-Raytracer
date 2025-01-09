@@ -9,6 +9,8 @@ Mesh::Mesh(std::string filename, glm::vec3 amb_col, glm::vec3 diff_col, glm::vec
 {
 	this->filename = filename;
 	loadTriangles();
+	genBoundingBox();
+	std::cout << "MESH BOUNDING BOX: MAX<" << this->boundingBox.max.x << "," << this->boundingBox.max.y << "," << this->boundingBox.max.z << ">, MIN<" << this->boundingBox.min.x << "," << this->boundingBox.min.y << "," << this->boundingBox.min.z << ">" << std::endl;
 }
 
 
@@ -97,4 +99,64 @@ void Mesh::print()
 			this->triangles[i]->print();
 		}
 	}
+}
+
+// generate AABB for mesh
+void Mesh::genBoundingBox()
+{
+	// retrieve the min & max xyz points
+	glm::vec3 max = glm::vec3(-INFINITY, -INFINITY, -INFINITY);
+	glm::vec3 min = glm::vec3(INFINITY, INFINITY, INFINITY);
+
+	for (int i = 0; i < (this->triangles.size()); i++)
+	{
+		// v1 comparison with max x,y,z
+		if (triangles[i]->v1.x > max.x)
+			max.x = triangles[i]->v1.x;
+		if (triangles[i]->v1.y > max.y)
+			max.y = triangles[i]->v1.y;
+		if (triangles[i]->v1.z > max.z)
+			max.z = triangles[i]->v1.z;
+
+		// v1 comparison with min x,y,z
+		if (triangles[i]->v1.x < min.x)
+			min.x = triangles[i]->v1.x;
+		if (triangles[i]->v1.y < min.y)
+			min.y = triangles[i]->v1.y;
+		if (triangles[i]->v1.z < min.z)
+			min.z = triangles[i]->v1.z;
+
+		// v2 comparison with max x,y,z
+		if (triangles[i]->v2.x > max.x)
+			max.x = triangles[i]->v2.x;
+		if (triangles[i]->v2.y > max.y)
+			max.y = triangles[i]->v2.y;
+		if (triangles[i]->v2.z > max.z)
+			max.z = triangles[i]->v2.z;
+
+		// v2 comparison with min x,y,z
+		if (triangles[i]->v2.x < min.x)
+			min.x = triangles[i]->v2.x;
+		if (triangles[i]->v2.y < min.y)
+			min.y = triangles[i]->v2.y;
+		if (triangles[i]->v2.z < min.z)
+			min.z = triangles[i]->v2.z;
+
+		// v3 comparison with max x,y,z
+		if (triangles[i]->v3.x > max.x)
+			max.x = triangles[i]->v3.x;
+		if (triangles[i]->v3.y > max.y)
+			max.y = triangles[i]->v3.y;
+		if (triangles[i]->v3.z > max.z)
+			max.z = triangles[i]->v3.z;
+
+		// v3 comparison with min x,y,z
+		if (triangles[i]->v3.x < min.x)
+			min.x = triangles[i]->v3.x;
+		if (triangles[i]->v3.y < min.y)
+			min.y = triangles[i]->v3.y;
+		if (triangles[i]->v3.z < min.z)
+			min.z = triangles[i]->v3.z;
+	}
+	this->boundingBox = BoundingBox(max, min);
 }

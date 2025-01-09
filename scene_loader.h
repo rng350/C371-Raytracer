@@ -24,6 +24,11 @@ bool load_scene(
 	std::vector<Triangle> temp_triangles;
 
 	FILE * file;
+
+	char abs_path[1024];
+	_fullpath(abs_path, path, sizeof(abs_path));
+	printf("Trying to open absolute path: %s\n", abs_path);
+
     int _errno = fopen_s(&file, path, "r");
 	if (_errno != 0)
 	{

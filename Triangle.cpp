@@ -11,7 +11,7 @@ Triangle::Triangle(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 amb_col, 
 	this->v2 = v2;
 	this->v3 = v3;
 	this->flat_normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
-	std::cout << "TRIANGLE FLAT NORMAL: " << flat_normal.x << "," << flat_normal.y << "," << flat_normal.z << std::endl;
+	//std::cout << "TRIANGLE FLAT NORMAL: " << flat_normal.x << "," << flat_normal.y << "," << flat_normal.z << std::endl;
 }
 bool Triangle::hit(const Ray& ray, double& t, ShadeInfo& shadeInfo)
 {

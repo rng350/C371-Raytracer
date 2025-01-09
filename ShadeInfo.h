@@ -1,4 +1,4 @@
-// stores a bunch of relevant info for the second ray
+// stores a bunch of relevant info for the shadow ray
 
 #ifndef SHADE
 #define SHADE

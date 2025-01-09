@@ -5,6 +5,7 @@
 #include "MeshTriangle.h"
 #include <iostream>
 #include "objloader.h"
+#include "BoundingBox.h"
 
 class Mesh : public GeometricObject
 {
@@ -15,8 +16,10 @@ public:
 	bool hit(const Ray& ray, double& t, ShadeInfo& shadeInfo);
 	std::vector<Triangle*> triangles;
 	std::string filename;
+	BoundingBox boundingBox;
 	void loadTriangles();
 	void print();
 	bool has_pt_normals;
+	void genBoundingBox();
 };
 #endif
